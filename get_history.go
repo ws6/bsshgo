@@ -60,7 +60,7 @@ func (self *Client) SearchHistory(ctx context.Context, params map[string]string)
 	}
 
 	base.RawQuery = q.Encode()
-	fmt.Println(base.String())
+
 	resp, err := self.NewRequestWithContext(ctx, `GET`, base.String(), nil)
 	if err != nil {
 		return nil, err
