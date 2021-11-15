@@ -22,7 +22,7 @@ var (
 )
 
 const (
-	AUTH_TOKEN = `X-Acess-Token`
+	AUTH_TOKEN = `x-access-token`
 	// ILMN_DOMAIN    = `X-ILMN-Domain`
 	// ILMN_WORKGROUP = `X-ILMN-Workgroup`
 	CONTENT_TYPE = `Content-Type`
@@ -72,7 +72,7 @@ func (self *Client) GetBaseUrl() string {
 	return self.cfg[`BASE_URL`]
 }
 
-func (self *Client) AttachHeaders(req *http.Request) {
+func (self *Client) AttachHeaders(req *http.Request, url string) {
 	for _, rk := range requiredKeys() {
 		req.Header.Set(rk, self.cfg[rk])
 	}
@@ -81,8 +81,13 @@ func (self *Client) AttachHeaders(req *http.Request) {
 
 	//for compatible with als domain api
 	// for history API https://developer.basespace.illumina.com/docs/content/documentation/rest-api/history-api-reference#HistoryAPIReference
-	req.Header.Set(`Authorization`, "Bearer "+req.Header.Get(AUTH_TOKEN))
-
+	// req.Header.Set(`Authorization`, "Bearer "+req.Header.Get(AUTH_TOKEN))
+	// /v1/feeds/bssh
+	//!!!the history API can not share with x-access-token header
+	if strings.Contains(url, `/v1/feeds/bssh`) {
+		req.Header.Del(`AUTH_TOKEN`)
+		req.Header.Set(`Authorization`, "Bearer "+req.Header.Get(AUTH_TOKEN))
+	}
 }
 
 //NewRequestWithContext over write http.NewRequestWithContext wih auth headers
@@ -98,7 +103,7 @@ func (self *Client) NewRequestWithContext(ctx context.Context, method, url strin
 		return nil, fmt.Errorf(`NewRequest:%s`, err.Error())
 	}
 
-	self.AttachHeaders(req)
+	self.AttachHeaders(req, url)
 
 	return self.httpclient.Do(req)
 }
