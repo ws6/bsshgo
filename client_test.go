@@ -23,7 +23,17 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestGetUser(t *testing.T) {
+func TestGetFile(t *testing.T) {
+	client := getNewClient()
+	fileId := `r219846639_24790960379`
+	txt, err := client.GetFileBytes(context.Background(), fileId)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Logf(string(txt))
+}
+
+func _TestGetUser(t *testing.T) {
 	client := getNewClient()
 
 	user, err := client.GetCurrentUser(context.Background())
@@ -34,7 +44,7 @@ func TestGetUser(t *testing.T) {
 	t.Logf(`%+v`, client.User)
 }
 
-func TestGetHistory(t *testing.T) {
+func _TestGetHistory(t *testing.T) {
 	client := getNewClient()
 	params := make(map[string]string)
 	params[`SortDir`] = `Asc`
