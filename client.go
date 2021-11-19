@@ -115,7 +115,7 @@ func (self *Client) NewRequestWithContext(ctx context.Context, method, url strin
 			modFn(req)
 		}
 	}
-	fmt.Println(req.Header)
+
 	return self.httpclient.Do(req)
 }
 
@@ -127,8 +127,7 @@ func (self *Client) GetBodyReader(ctx context.Context, url string, modFns ...Mod
 	}
 
 	if resp.StatusCode >= 300 {
-		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Println(string(body))
+
 		return nil, fmt.Errorf(`bad status code:%d`, resp.StatusCode)
 	}
 	return resp.Body, nil
