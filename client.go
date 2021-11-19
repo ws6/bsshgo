@@ -90,8 +90,10 @@ func (self *Client) AttachHeaders(req *http.Request, url string) {
 	}
 }
 
+type ModifyRequest func(*http.Request)
+
 //NewRequestWithContext over write http.NewRequestWithContext wih auth headers
-func (self *Client) NewRequestWithContext(ctx context.Context, method, url string, body io.Reader) (*http.Response, error) {
+func (self *Client) NewRequestWithContext(ctx context.Context, method, url string, body io.Reader, modifiers ...ModifyRequest) (*http.Response, error) {
 	absUrl := self.GetBaseUrl() + url
 
 	if strings.HasPrefix(url, "https://") || strings.HasPrefix(url, "http://") {
@@ -102,8 +104,14 @@ func (self *Client) NewRequestWithContext(ctx context.Context, method, url strin
 	if err != nil {
 		return nil, fmt.Errorf(`NewRequest:%s`, err.Error())
 	}
+	if len(modifiers) == 0 {
+		self.AttachHeaders(req, url)
+	}
 
-	self.AttachHeaders(req, url)
-
+	if len(modifiers) > 0 {
+		for _, modFn := range modifiers {
+			modFn(req)
+		}
+	}
 	return self.httpclient.Do(req)
 }
