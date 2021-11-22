@@ -6,6 +6,17 @@ import (
 	"fmt"
 )
 
+type RunLayoutResp struct {
+	Lane string
+
+	Index  string `json:"index"`
+	Index2 string `json:"index2"`
+	//the below three attributes belong to Name="Cloud" specificly
+	Sample_ID   string
+	ProjectName string
+	LibraryName string
+}
+
 //run.go retrieve run models
 //RunSampleSheetLayoutResp no pagination support
 type RunSampleSheetLayoutResp struct {
@@ -26,16 +37,17 @@ type RunSampleSheetLayoutResp struct {
 			Key   string
 			Value string
 		}
-		Data []struct {
-			Lane     string
-			SampleID string
-			Index    string `json:"index"`
-			Index2   string `json:"index2"`
-			//the below three attributes belong to Name="Cloud" specificly
-			Sample_ID   string
-			ProjectName string
-			LibraryName string
-		}
+		Data []*RunLayoutResp
+		// Data []struct {
+		// 	Lane string
+
+		// 	Index  string `json:"index"`
+		// 	Index2 string `json:"index2"`
+		// 	//the below three attributes belong to Name="Cloud" specificly
+		// 	Sample_ID   string
+		// 	ProjectName string
+		// 	LibraryName string
+		// }
 	}
 }
 
@@ -50,4 +62,38 @@ func (self *Client) GetRunSampleSheetLayout(ctx context.Context, runId string) (
 		return nil, err
 	}
 	return ret, nil
+}
+
+func ConcateRunLayoutWithBCLConvertAndCloudApplicaions(resp *RunSampleSheetLayoutResp) []*RunLayoutResp {
+	ret := []*RunLayoutResp{}
+
+	getAppData := func(s string) []*RunLayoutResp {
+		for _, app := range resp.Applications {
+			if app.Name == s {
+				return app.Data
+			}
+		}
+		return nil
+	}
+
+	bclConvertData := getAppData(`BCLConvert`)
+	cloudData := getAppData(`Cloud`)
+	getLayoutMore := func(r *RunLayoutResp) error {
+		for _, d := range cloudData {
+			if d.Sample_ID == r.Sample_ID {
+				r.ProjectName = d.ProjectName
+				r.LibraryName = d.LibraryName
+			}
+		}
+		return ERR_NOT_FOUND
+	}
+
+	for _, d := range bclConvertData {
+		if err := getLayoutMore(d); err != nil {
+			continue
+		}
+		ret = append(ret, d)
+	}
+
+	return ret
 }

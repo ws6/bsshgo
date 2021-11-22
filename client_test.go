@@ -27,17 +27,6 @@ func getNewClient() *Client {
 func TestGetAnalysisById(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
-	// 486869383
-	_biosamples, err := client.GetAnalysisBioSamples(ctx, `486869383`)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	for bs := range _biosamples {
-		t.Logf("%+v", bs)
-
-	}
-	return
-
 	// GetRunSampleSheetLayout
 
 	layouts, err := client.GetRunSampleSheetLayout(ctx, `219700482`)
@@ -51,6 +40,17 @@ func TestGetAnalysisById(t *testing.T) {
 		}
 	}
 	return
+	// 486869383
+	_biosamples, err := client.GetAnalysisBioSamples(ctx, `486869383`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for bs := range _biosamples {
+		t.Logf("%+v", bs)
+
+	}
+	return
+
 	// GetBioSampleRuns
 	runs, err := client.GetBioSampleRuns(ctx, `470613150`)
 	if err != nil {
