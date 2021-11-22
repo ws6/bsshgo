@@ -78,18 +78,25 @@ func ConcateRunLayoutWithBCLConvertAndCloudApplicaions(resp *RunSampleSheetLayou
 
 	bclConvertData := getAppData(`BCLConvert`)
 	cloudData := getAppData(`Cloud`)
+
 	getLayoutMore := func(r *RunLayoutResp) error {
+		if cloudData == nil {
+			return fmt.Errorf(`Cloud data is empty`)
+		}
 		for _, d := range cloudData {
 			if d.Sample_ID == r.Sample_ID {
 				r.ProjectName = d.ProjectName
 				r.LibraryName = d.LibraryName
+				return nil
 			}
 		}
+
 		return ERR_NOT_FOUND
 	}
 
 	for _, d := range bclConvertData {
 		if err := getLayoutMore(d); err != nil {
+
 			continue
 		}
 		ret = append(ret, d)
