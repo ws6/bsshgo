@@ -104,3 +104,9 @@ func ConcateRunLayoutWithBCLConvertAndCloudApplicaions(resp *RunSampleSheetLayou
 
 	return ret
 }
+
+//GetRunHref this is being used as GUID for a run entity; it could be used as client side identity
+//return like https://api.basespace.illumina.com/v2/runs/219700482
+func (self *Client) GetRunHref(runId string) string {
+	return fmt.Sprintf(`%s/v2/run/%s`, self.GetBaseUrl(), runId)
+}
