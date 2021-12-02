@@ -65,20 +65,22 @@ func (self *Client) GetAllFilesFromDir(ctx context.Context,
 	runId string,
 	params map[string]string,
 	dir string) chan *FileItem {
-
-	ret := make(chan *FileItem)
+	limit := 20
+	ret := make(chan *FileItem, 3*limit)
 	go func() {
 		defer close(ret)
-		limit := 20
+
 		offset := 0
-		params[`limit`] = fmt.Sprintf(`%d`, limit)
-		params[`offset`] = fmt.Sprintf(`%d`, offset)
+
 		for {
+			params[`limit`] = fmt.Sprintf(`%d`, limit)
+			params[`offset`] = fmt.Sprintf(`%d`, offset)
 			page, err := self.GetFileRespFromDir(ctx, runId, params, dir)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
+			offset += limit
 
 			for _, found := range page.Items {
 				ret <- found
@@ -127,6 +129,25 @@ func (self *Client) GetFileRespFromDir(ctx context.Context,
 		return nil, err
 	}
 	ret := new(FileResp)
+	if err := json.Unmarshal(body, ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+type FileS3PresignedUrlResp struct {
+	Expires       string
+	HrefContent   string
+	SupportsRange bool
+}
+
+func (self *Client) GetFileS3PresignedUrlResp(ctx context.Context, fileId string) (*FileS3PresignedUrlResp, error) {
+	url := fmt.Sprintf(`/v2/files/%s/content?redirect=meta`, fileId)
+	body, err := self.GetBytes(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	ret := new(FileS3PresignedUrlResp)
 	if err := json.Unmarshal(body, ret); err != nil {
 		return nil, err
 	}

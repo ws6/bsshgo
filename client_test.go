@@ -24,8 +24,23 @@ func getNewClient() *Client {
 	return ret
 }
 
+//GetDatasetsFilesChan
+func TestGetDatasetsFilesChan(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+
+	ch := client.GetDatasetsFilesChan(ctx, `ds.64c26093cba14416997cf8d48fd8b046`)
+	found := 0
+	for item := range ch {
+		t.Log(item)
+		found++
+	}
+	t.Logf("found total files %d\n", found)
+}
+
 //GetAnalysisById
-func TestGetAnalysisById(t *testing.T) {
+func _TestGetAnalysisById(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
@@ -722,7 +737,7 @@ var samplesheetresp = `{
 	}]
 }`
 
-func TestConcateSampleSheet(t *testing.T) {
+func _TestConcateSampleSheet(t *testing.T) {
 	tocat := new(RunSampleSheetLayoutResp)
 	if err := json.Unmarshal([]byte(samplesheetresp), tocat); err != nil {
 		t.Fatal(err.Error())
