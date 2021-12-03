@@ -115,8 +115,8 @@ func downloadWorker(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, op
 	}()
 
 	if _, err := io.Copy(ofh, rc); err != nil {
-		fmt.Println(`io.Copy err`, err.Error())
-		return err
+		//if invalidate argument, it is most likely from the rc.Close()
+		return fmt.Errorf(`io.Copy:%s`, err.Error())
 	}
 
 	return nil

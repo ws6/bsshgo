@@ -24,8 +24,21 @@ func getNewClient() *Client {
 	return ret
 }
 
+func TestFindOneAnalysisByName(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	name := `ILS_DRAGEN_GL_2.0.2 11/08/2021 12:41:34`
+	found, err := client.FindOneAnalysisByName(ctx, name)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	t.Logf("%+v\n", found)
+}
+
 //GetDatasetsFilesChan
-func TestGetDatasetsFilesChan(t *testing.T) {
+func _TestGetDatasetsFilesChan(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout

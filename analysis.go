@@ -369,3 +369,107 @@ func (self *Client) GetAnalysisBioSamples(ctx context.Context, analysisId string
 	}()
 	return ret, nil
 }
+
+//FindOneAnalysisByName assumed only one result get hit.
+//NB: AnalysisResp is not 100% same spec as it is.
+//actual returned
+// {
+//     "Items": [
+//         {
+//             "Id": "484415694",
+//             "Name": "ILS_DRAGEN_GL_2.0.2 11/08/2021 12:41:34",
+//             "Href": "https://api.basespace.illumina.com/v2/appsessions/484415694",
+//             "Application": {
+//                 "Id": "12760748",
+//                 "Href": "v1pre3/applications/12760748",
+//                 "Name": "ILS_DRAGEN_GL_2.0.2",
+//                 "CompanyName": "2e676b91-a9d1-4518-8f40-b8ec...",
+//                 "VersionNumber": "1.0.0",
+//                 "ShortDescription": "'ILS",
+//                 "DateCreated": "2021-10-29T10:55:16.0000000Z",
+//                 "PublishStatus": "Beta",
+//                 "IsBillingActivated": false,
+//                 "Category": "Workflow",
+//                 "Classifications": [],
+//                 "AppFamilySlug": "2e676b91-a9d1-4518-8f40-b8ec.ils_dragen_gl_2.0.2",
+//                 "AppVersionSlug": "2e676b91-a9d1-4518-8f40-b8ec.ils_dragen_gl_2.0.2.1.0.0",
+//                 "Features": [],
+//                 "LockStatus": "Unlocked"
+//             },
+//             "UserCreatedBy": {
+//                 "Id": "27392365",
+//                 "Href": "https://api.basespace.illumina.com/v2/users/27392365",
+//                 "Name": "ILS_SD_NovaSeq_Integration",
+//                 "DateCreated": "2021-08-09T21:10:06.0000000Z",
+//                 "GravatarUrl": "https://secure.gravatar.com/avatar/8e4e5ab5bf1e5a2eeb564a5f023bb9dc.jpg?s=20&d=mm&r=PG",
+//                 "HrefProperties": "https://api.basespace.illumina.com/v2/users/current/properties",
+//                 "ExternalDomainId": "YXdzLXVzLXBsYXRmb3JtOjEwMDAwNzgyOjk0ZWFlN2I2LWRjNDItNDAzMS04NGYwLTQ5YTllMmUyOTVhZA"
+//             },
+//             "ExecutionStatus": "Running",
+//             "QcStatus": "Undefined",
+//             "StatusSummary": "",
+//             "Purpose": "AppTrigger",
+//             "DateCreated": "2021-11-08T20:43:44.0000000Z",
+//             "DateModified": "2021-11-08T20:43:55.0000000Z",
+//             "DateStarted": "2021-11-08T20:43:55.0000000Z",
+//             "DeliveryStatus": "None",
+//             "ContainsComments": false,
+//             "HrefComments": "https://api.basespace.illumina.com/v2/appsessions/484415694/comments"
+//         }
+//     ],
+//     "Paging": {
+//         "DisplayedCount": 1,
+//         "TotalCount": 1,
+//         "Offset": 0,
+//         "Limit": 10,
+//         "SortDir": "Asc",
+//         "SortBy": "Name"
+//     }
+// }
+func (self *Client) FindOneAnalysisByName(ctx context.Context, name string) (*AnalysisResp, error) {
+	_url := `/v2/appsessions`
+	params := map[string]string{
+		`name`:   name,
+		`limit`:  "1",
+		`offset`: "0",
+	}
+	base, err := url.Parse(_url)
+	if err != nil {
+
+		return nil, err
+	}
+	q := url.Values{}
+
+	for k, v := range params {
+		q.Add(k, v)
+	}
+
+	base.RawQuery = q.Encode()
+
+	body, err := self.GetBytes(ctx, base.String())
+	if err != nil {
+
+		return nil, err
+	}
+
+	resp := new(GeneralPropertiesResp)
+	if err := json.Unmarshal(body, resp); err != nil {
+		return nil, err
+	}
+	if resp.Paging.TotalCount == 0 || len(resp.Items) == 0 {
+		return nil, fmt.Errorf(`not founds`)
+	}
+	if resp.Paging.TotalCount > 1 || len(resp.Items) > 1 {
+		return nil, fmt.Errorf(`multiple results returned`)
+	}
+
+	b, err := json.Marshal(resp.Items[0])
+	if err != nil {
+		return nil, err
+	}
+	ret := new(AnalysisResp)
+	if err := json.Unmarshal(b, ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
