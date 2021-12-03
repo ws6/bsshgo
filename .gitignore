@@ -3,3 +3,5 @@
 app.conf
 *.json
 *.gz
+.tmp
+.tmp/*.*

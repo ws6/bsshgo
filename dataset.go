@@ -46,12 +46,13 @@ func (self *Client) GetDatasetsFilesChan(ctx context.Context, dsId string) chan 
 		for {
 			params[`limit`] = fmt.Sprintf(`%d`, limit)
 			params[`offset`] = fmt.Sprintf(`%d`, offset)
+			offset += limit
 			page, err := self.GetDatasetsFiles(ctx, dsId, params)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
 			}
-			offset += limit
+
 			for _, found := range page.Items {
 				ret <- found
 				select {
