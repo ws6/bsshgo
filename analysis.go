@@ -473,3 +473,79 @@ func (self *Client) FindOneAnalysisByName(ctx context.Context, name string) (*An
 	}
 	return ret, nil
 }
+
+type DatasetItemResp struct {
+	Id      string //dont know what is this
+	Dataset struct {
+		Id           string //the actual dataset Id
+		Href         string
+		HrefFiles    string
+		Name         string
+		DateCreated  string
+		DateModified string
+		AppSession   struct {
+			Id   string
+			Name string
+			Href string
+			ApplicationResp
+		}
+		Project struct {
+			Id   string
+			Name string
+			Href string
+		}
+		TotalSize           int64
+		IsArchived          bool
+		Attributes          map[string]interface{}
+		QcStatus            string
+		UploadStatus        string
+		UploadStatusSummary string
+		ValidationStatus    string
+		V1pre3Id            string
+		HrefComments        string
+		ContainsComments    bool
+	}
+}
+
+func (self *Client) GetAnalysisOutputDatasetChan(ctx context.Context, analysisId string) (chan *DatasetItemResp, error) {
+	url := fmt.Sprintf(`/v2/appsessions/%s/properties/Output.Datasets/items`, analysisId)
+
+	params := make(map[string]string)
+
+	limit := 30
+
+	params[`limit`] = fmt.Sprintf(`%d`, limit)
+
+	ch, err := self.GetGeneralItemsChannel(ctx, url, params)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := make(chan *DatasetItemResp, 2*cap(ch))
+	go func() {
+		defer close(ret)
+
+		for found := range ch {
+			if found.Err != nil {
+				return
+			}
+
+			body, err := json.Marshal(found.Item)
+			if err != nil {
+				return
+			}
+			topush := new(DatasetItemResp)
+			if err := json.Unmarshal(body, topush); err != nil {
+				return
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case ret <- topush:
+				continue
+			}
+		}
+
+	}()
+	return ret, nil
+}

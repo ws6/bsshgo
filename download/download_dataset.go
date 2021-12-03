@@ -73,7 +73,7 @@ func DownloadDataset(ctx0 context.Context, client *bsshgo.Client, ds string, opt
 
 		return nil
 	case <-ctx0.Done():
-		return ctx.Err()
+		return ctx0.Err()
 	}
 	panic(`it should never reach here`)
 	return nil

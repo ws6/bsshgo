@@ -24,7 +24,26 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestFindOneAnalysisByName(t *testing.T) {
+// GetAnalysisOutputDatasetChan
+
+func TestGetAnalysisOutputDatasetChan(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	appsessionId := `486707227`
+	ch, err := client.GetAnalysisOutputDatasetChan(ctx, appsessionId)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	found := 0
+	for item := range ch {
+		t.Logf("%+v\n", item)
+		found++
+	}
+	t.Logf("found total dataset %d\n", found)
+}
+
+func _TestFindOneAnalysisByName(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
