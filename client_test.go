@@ -24,9 +24,24 @@ func getNewClient() *Client {
 	return ret
 }
 
+func TestUpdateAnalysis(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	appsessionId := `486707226`
+	updates := map[string]interface{}{
+		`DeliveryStatus`: `Delivered`,
+	}
+	res, err := client.UpdateAnalysis(ctx, appsessionId, updates)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Logf(`%+v`, res)
+}
+
 // GetAnalysisOutputDatasetChan
 
-func TestGetAnalysisOutputDatasetChan(t *testing.T) {
+func _TestGetAnalysisOutputDatasetChan(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
@@ -777,6 +792,9 @@ func _TestConcateSampleSheet(t *testing.T) {
 	combo := ConcateRunLayoutWithBCLConvertAndCloudApplicaions(tocat)
 
 	for _, layout := range combo {
+		if layout.Sample_ID != `LP9000124-DNA_A01` {
+			continue
+		}
 		t.Logf("%+v\n", layout)
 	}
 }

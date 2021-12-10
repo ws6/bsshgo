@@ -1,6 +1,7 @@
 package bsshgo
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -117,6 +118,34 @@ func (self *Client) NewRequestWithContext(ctx context.Context, method, url strin
 	}
 
 	return self.httpclient.Do(req)
+}
+
+//GetBytes a GET method with a return type []byte
+func (self *Client) PostBodyReader(ctx context.Context, url string, post map[string]interface{}, modFns ...ModifyRequest) (io.ReadCloser, error) {
+	body, err := json.Marshal(post)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := self.NewRequestWithContext(ctx, `POST`, url, bytes.NewReader(body), modFns...)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode >= 300 {
+
+		return nil, fmt.Errorf(`bad status code:%d`, resp.StatusCode)
+	}
+	return resp.Body, nil
+
+}
+
+func (self *Client) PostBytes(ctx context.Context, url string, post map[string]interface{}, modFns ...ModifyRequest) ([]byte, error) {
+	reader, err := self.PostBodyReader(ctx, url, post, modFns...)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	return ioutil.ReadAll(reader)
 }
 
 //GetBytes a GET method with a return type []byte

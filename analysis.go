@@ -549,3 +549,16 @@ func (self *Client) GetAnalysisOutputDatasetChan(ctx context.Context, analysisId
 	}()
 	return ret, nil
 }
+
+func (self *Client) UpdateAnalysis(ctx context.Context, analysisId string, updates map[string]interface{}) (*AnalysisResp, error) {
+	_url := fmt.Sprintf(`/v2/appsessions/%s`, analysisId)
+	body, err := self.PostBytes(ctx, _url, updates)
+	if err != nil {
+		return nil, err
+	}
+	ret := new(AnalysisResp)
+	if err := json.Unmarshal(body, ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
