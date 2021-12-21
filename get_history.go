@@ -33,6 +33,25 @@ type HistoryResp struct {
 	}
 }
 
+type FieldChange struct {
+	NewValue string
+	OldValue string
+}
+
+//BsshEventPre likely the common attributes accross all event's Items
+type BsshEventPre struct {
+	ActingUserId     string
+	ActingUserName   string
+	EventType        string
+	DateCreated      string
+	Id               string //unique event ID at bssh
+	LoggedInUserName string
+	ResourceId       string
+	ResourceType     string
+	FieldChanges     map[string]*FieldChange
+	// Metadata         map[string]string
+}
+
 func (self *Client) SearchHistory(ctx context.Context, params map[string]string) (*HistoryResp, error) {
 	if self.User == nil {
 		user, err := self.GetCurrentUser(ctx)
