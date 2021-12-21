@@ -7,7 +7,7 @@ import (
 
 	"strings"
 
-	"github.com/ws6/interop/fcinfo"
+	"github.com/ws6/fcinfo"
 
 	"github.com/araddon/dateparse"
 	"github.com/ws6/bsshgo"

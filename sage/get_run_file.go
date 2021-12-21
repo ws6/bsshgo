@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/ws6/bsshgo"
-	"github.com/ws6/interop/fcinfo"
+	"github.com/ws6/fcinfo"
 )
 
 func GetFlowcellFromFile(ctx context.Context, client *bsshgo.Client, runId string) (*fcinfo.Flowcell, error) {
