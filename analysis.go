@@ -11,10 +11,15 @@ import (
 //analysis.go entity model retrieval for analysis(a.k.a appsession)
 
 type ApplicationResp struct {
-	Id            string
-	Href          string
-	Name          string
-	VersionNumber string
+	Id               string
+	Href             string
+	Name             string
+	VersionNumber    string
+	ShortDescription string
+	DateCreated      string
+	PublishStatus    string
+	Category         string
+	LockStatus       string
 }
 
 type GeneralPropetyItem struct {
