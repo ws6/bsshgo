@@ -288,11 +288,16 @@ func BuildSageSpec(seq *SeqStatsPre, run *RunInfoPre, fc *fcinfo.Flowcell) (map[
 		}
 	}
 
-	if run.Instrument.Number == 0 {
+	if run.Instrument.Number != 0 {
 
 		flowcell[`run_number`] = run.Instrument.Number
 
 	}
+
+	if run.Instrument.Type != "" {
+		flowcell[`instrument_type`] = run.Instrument.Type
+	}
+
 	if fc.ApplicationVersion != "" {
 		flowcell[`application_version`] = fc.ApplicationVersion
 	}

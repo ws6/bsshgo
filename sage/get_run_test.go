@@ -34,11 +34,13 @@ func TestGetFileAtFolder(t *testing.T) {
 	client := getNewClient()
 
 	runIds := []string{
-		`219846639`, //no flowcell_barcode and run_id
-		`219700482`, //no flowcell_barcode and run_id
-		`215662457`,
-		`219101888`, //no flowcell_barcode and run_id
-		`219093876`, //no flowcell_barcode and run_id
+		// `219846639`, //no flowcell_barcode and run_id
+		// `219700482`, //no flowcell_barcode and run_id
+		// `215662457`,
+		// `219101888`, //no flowcell_barcode and run_id
+		// `219093876`, //no flowcell_barcode and run_id
+		// `212632424`, //a incompleted run from icsl prod
+		`225792635`,
 	}
 
 	for _, rid := range runIds {
