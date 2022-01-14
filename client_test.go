@@ -3,6 +3,7 @@ package bsshgo
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 )
@@ -24,7 +25,29 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestUpdateAnalysis(t *testing.T) {
+func TestGetAnalysisGeneralItems(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	appsessionId := `511567056`
+	ch, err := client.GetGeneralItemsChannel(
+		ctx,
+		fmt.Sprintf(`/v2/appsessions/%s/properties/Input.automation-sample-id.datasets/items`, appsessionId),
+		map[string]string{},
+	)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for found := range ch {
+		if found.Err != nil {
+			t.Fatal(found.Err.Error())
+		}
+		t.Logf(`%+v`, found.Item)
+	}
+
+}
+
+func _TestUpdateAnalysis(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout

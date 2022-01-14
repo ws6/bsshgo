@@ -17,11 +17,13 @@ type BioSampleResp struct {
 		Href string //most likely v1pre3/projects/:Id
 		Name string
 	}
-	DateModified string
-	DateCreated  string
-	Status       string
-	LabStatus    string
-	Properties   struct {
+	DateModified      string
+	DateCreated       string
+	ContainerName     string
+	ContainerPosition string
+	Status            string
+	LabStatus         string
+	Properties        struct {
 		Items        []*GeneralPropetyItem
 		DisplayCount int
 		TotalCount   int
