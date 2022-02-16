@@ -25,7 +25,26 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestGetAnalysisGeneralItems(t *testing.T) {
+func TestGetGetBioSamplesFromAnalysisThroughFastqDatasetUsed(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	appsessionId := `528324809`
+	res, err := client.GetBioSamplesFromAnalysisThroughFastqDatasetUsed(
+		ctx,
+		appsessionId,
+	)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for _, found := range res {
+
+		t.Logf(`%+v`, found.BioSample)
+	}
+
+}
+
+func _TestGetAnalysisGeneralItems(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
