@@ -25,7 +25,65 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestGetGetBioSamplesFromAnalysisThroughFastqDatasetUsed(t *testing.T) {
+func TestGetRunLayout(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	runId := `221597439`
+	res, err := client.GetRunLayout(
+		ctx,
+		runId,
+	)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for _, found := range res {
+
+		t.Logf(`%+v`, found)
+	}
+
+}
+
+// GetRunLayoutFromLanelibrarymappings
+func _TestGetGetRunLayoutFromLanelibrarymappings(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	runId := `221597439`
+	res, err := client.GetRunLayoutFromLanelibrarymappings(
+		ctx,
+		runId,
+	)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for _, found := range res {
+
+		t.Logf(`%+v`, found)
+	}
+
+}
+
+// GetLibraryPoolInfo
+func _TestGetLibraryPoolInfo(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	// GetRunSampleSheetLayout
+	poolId := `199512489`
+	res, err := client.GetLibraryPoolInfo(
+		ctx,
+		poolId,
+	)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	for _, found := range res {
+
+		t.Logf(`%+v`, found)
+	}
+
+}
+func _TestGetGetBioSamplesFromAnalysisThroughFastqDatasetUsed(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout

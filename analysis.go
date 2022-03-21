@@ -196,7 +196,9 @@ func (self *Client) GetAnalysisPropertyUntil(ctx context.Context, analysisId, pr
 
 //GetItemsChannel it aims for in general cases a URl with Params and support limit/offset in  Params
 func (self *Client) GetGeneralItemsChannel(ctx context.Context, _url string, params map[string]string) (chan *ChannelResp, error) {
-
+	if params == nil {
+		params = make(map[string]string)
+	}
 	limit := 30
 	offset := 0
 

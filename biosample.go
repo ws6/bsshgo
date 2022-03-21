@@ -70,6 +70,21 @@ func (self *Client) GetBioSamplePropertyItemUntil(ctx context.Context, sampleId 
 	return self.GetGeneralPropertyItemUntil(ctx, url, params, fn)
 }
 
+type LibraryPrepItem struct {
+	Id                      string
+	Href                    string
+	Name                    string
+	ValidIndexingStrategies string
+	ValidReadTypes          string
+	NumIndexCycles          int
+	AdapterSequenceRead1    string
+	AdapterSequenceRead2    string
+	DateModified            string
+	State                   string
+	DefaultRead1Cycles      int
+	DefaultRead2Cycles      int
+	LibraryType             string
+}
 type LibraryItemResp struct {
 	Id           string
 	Href         string
@@ -77,22 +92,8 @@ type LibraryItemResp struct {
 	DateCreated  string
 	DateModified string
 	Status       string
-	LibraryPrep  struct {
-		Id                      string
-		Href                    string
-		Name                    string
-		ValidIndexingStrategies string
-		ValidReadTypes          string
-		NumIndexCycles          int
-		AdapterSequenceRead1    string
-		AdapterSequenceRead2    string
-		DateModified            string
-		State                   string
-		DefaultRead1Cycles      int
-		DefaultRead2Cycles      int
-		LibraryType             string
-	}
-	Pools []struct {
+	LibraryPrep  LibraryPrepItem
+	Pools        []struct {
 		Id   string
 		Href string
 

@@ -110,3 +110,123 @@ func ConcateRunLayoutWithBCLConvertAndCloudApplicaions(resp *RunSampleSheetLayou
 func (self *Client) GetRunHref(runId string) string {
 	return fmt.Sprintf(`%s/v2/runs/%s`, self.GetBaseUrl(), runId)
 }
+
+type LaneLibraryMappingsItem struct {
+	LaneId        string
+	LaneNumber    int
+	BioSampleName string //finger crossed there is no difference from BioSample.BioSample
+	LibraryName   string
+	BioSample     BioSampleItem
+	Library       LibraryPrepItem
+	LibraryPool   struct {
+		Id           string
+		Href         string
+		Name         string
+		LibraryCount int
+		DateModified string
+		DateCreated  string
+		Status       string
+	}
+	DataSetName    string
+	DatasetYieldBp int64
+	ProjectName    string
+}
+
+func (self *Client) GetRunLaneLibraryMappingsItem(ctx context.Context, runId string) ([]*LaneLibraryMappingsItem, error) {
+	_url := fmt.Sprintf(`/v2/runs/%s/lanelibrarymappings`, runId)
+	ch, err := self.GetGeneralItemsChannel(ctx, _url, nil)
+	if err != nil {
+		return nil, err
+	}
+	ret := []*LaneLibraryMappingsItem{}
+	for item := range ch {
+		if item.Err != nil {
+			return nil, err
+		}
+		body, err := json.Marshal(item.Item)
+		if err != nil {
+			return nil, err
+		}
+		topush := new(LaneLibraryMappingsItem)
+		if err := json.Unmarshal(body, topush); err != nil {
+			return nil, err
+		}
+		ret = append(ret, topush)
+	}
+
+	return ret, nil
+}
+func (self *Client) GetRunLayoutFromLanelibrarymappings(ctx context.Context, runId string) ([]*RunLayoutResp, error) {
+
+	getLibPool := func() func(poolId string) ([]*LibraryPoolItem, error) {
+		cache := make(map[string][]*LibraryPoolItem)
+		return func(poolId string) ([]*LibraryPoolItem, error) {
+			found, ok := cache[poolId]
+			if ok {
+				return found, nil
+			}
+			ret, err := self.GetLibraryPoolInfo(ctx, poolId)
+			if err != nil {
+				return nil, err
+			}
+			cache[poolId] = ret
+
+			return ret, nil
+		}
+	}()
+	getLibraryItem := func(poolId, libraryName string) (*LibraryPoolItem, error) {
+		pool, err := getLibPool(poolId)
+		if err != nil {
+			return nil, fmt.Errorf(`no pool`)
+		}
+		for _, item := range pool {
+			if item.Name == libraryName {
+				return item, nil
+			}
+		}
+		return nil, fmt.Errorf(`no pool item`)
+	}
+
+	laneMappings, err := self.GetRunLaneLibraryMappingsItem(ctx, runId)
+
+	if err != nil {
+		return nil, fmt.Errorf(`GetRunLaneLibraryMappingsItem:%s`, err.Error())
+	}
+	if len(laneMappings) == 0 {
+		return nil, fmt.Errorf(`no laneMappings`)
+	}
+	ret := []*RunLayoutResp{}
+	for _, item := range laneMappings {
+		topush := new(RunLayoutResp)
+		topush.Sample_ID = item.BioSampleName
+		topush.ProjectName = item.ProjectName
+		topush.LibraryName = item.LibraryName
+		libpoolitem, err := getLibraryItem(item.LibraryPool.Id, topush.LibraryName)
+		if err != nil {
+			return nil, fmt.Errorf(`getLibraryItem:%s`, err.Error())
+		}
+		topush.Lane = fmt.Sprintf("%d", item.LaneNumber)
+		topush.Index = libpoolitem.Index1Sequence
+		topush.Index2 = libpoolitem.Index2Sequence
+		ret = append(ret, topush)
+	}
+
+	return ret, nil
+}
+
+func (self *Client) GetRunLayoutFromV2SampleSheetAPI(ctx context.Context, runId string) ([]*RunLayoutResp, error) {
+	lay1, err := self.GetRunSampleSheetLayout(ctx, runId)
+	if err != nil {
+		return nil, fmt.Errorf(`GetRunSampleSheetLayout:%s`, err.Error())
+	}
+	return ConcateRunLayoutWithBCLConvertAndCloudApplicaions(lay1), nil
+}
+
+func (self *Client) GetRunLayout(ctx context.Context, runId string) ([]*RunLayoutResp, error) {
+	ret1, err1 := self.GetRunLayoutFromV2SampleSheetAPI(ctx, runId)
+	if err1 != nil {
+		fmt.Println(`GetRunLayoutFromV2SampleSheetAPI not working. trying GetRunLayoutFromLanelibrarymappings`)
+		return self.GetRunLayoutFromLanelibrarymappings(ctx, runId)
+	}
+	return ret1, nil
+}
