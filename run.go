@@ -243,7 +243,8 @@ type RunDetailsResp struct {
 	Workflow            string
 	V1Pre3Id            string
 	Instrument          struct {
-		Id           string
+		Id           int64
+		Number       int64
 		Name         string
 		Type         string
 		PlatformName string
