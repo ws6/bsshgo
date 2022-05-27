@@ -569,3 +569,85 @@ func (self *Client) UpdateAnalysis(ctx context.Context, analysisId string, updat
 	}
 	return ret, nil
 }
+
+func (self *Client) GetAnalysis(ctx context.Context, params map[string]string) (*GeneralPropertiesResp, error) {
+	_url := fmt.Sprintf(`/v2/appsessions`)
+
+	base, err := url.Parse(_url)
+	if err != nil {
+		return nil, err
+	}
+	q := url.Values{}
+
+	if params != nil {
+		for k, v := range params {
+			q.Add(k, v)
+		}
+	}
+
+	base.RawQuery = q.Encode()
+	resp, err := self.GetBytes(ctx, base.String())
+	if err != nil {
+		return nil, err
+	}
+	ret := new(GeneralPropertiesResp)
+	if err := json.Unmarshal(resp, ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (self *Client) GetAnalysisChan(ctx context.Context) chan *AnalysisResp {
+	limit := 10
+	offset := 0
+	itemToAnalysisResp := func(m map[string]interface{}) *AnalysisResp {
+		ret := new(AnalysisResp)
+
+		body, err := json.Marshal(m)
+		if err != nil {
+			return nil
+		}
+
+		if err := json.Unmarshal(body, ret); err != nil {
+			return nil
+		}
+
+		return ret
+	}
+	ret := make(chan *AnalysisResp, 3*limit)
+	params := make(map[string]string)
+	go func() {
+		defer close(ret)
+
+		for {
+
+			params[`offset`] = fmt.Sprintf(`%d`, offset)
+			params[`limit`] = fmt.Sprintf(`%d`, limit)
+			res, err := self.GetAnalysis(ctx, params)
+			offset += limit
+			if err != nil {
+				fmt.Println(err.Error())
+				return
+			}
+
+			for _, item := range res.Items {
+				topush := itemToAnalysisResp(item)
+				if topush == nil {
+					fmt.Println(`json failed`)
+					return
+				}
+				select {
+				case <-ctx.Done():
+					return
+				case ret <- topush:
+				}
+			}
+
+			if len(res.Items) < limit {
+				return
+			}
+		}
+	}()
+
+	return ret
+}

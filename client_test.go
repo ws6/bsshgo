@@ -25,7 +25,37 @@ func getNewClient() *Client {
 	return ret
 }
 
-func TestGetRunLayout(t *testing.T) {
+//GetAnalysisChan
+func TestGetAnalysisChan(t *testing.T) {
+	client := getNewClient()
+	ctx := context.Background()
+	c := client.GetAnalysisChan(ctx)
+	prop := make(map[string]map[string]int)
+	for a1 := range c {
+
+		k := a1.Application.Name + "/" + a1.Application.VersionNumber
+		if _, ok := prop[k]; !ok {
+			prop[k] = make(map[string]int)
+		}
+		m := prop[k]
+
+		a2, err := client.GetAnalysisById(ctx, a1.Id)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		for _, pi := range a2.Properties.Items {
+			m[pi.Name]++
+		}
+	}
+
+	for k1, v1 := range prop {
+		t.Log(k1)
+		for k2, v2 := range v1 {
+			t.Log(k2, v2)
+		}
+	}
+}
+func _TestGetRunLayout(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
@@ -87,7 +117,7 @@ func _TestGetGetBioSamplesFromAnalysisThroughFastqDatasetUsed(t *testing.T) {
 	client := getNewClient()
 	ctx := context.Background()
 	// GetRunSampleSheetLayout
-	appsessionId := `528324809`
+	appsessionId := `494909450`
 	res, err := client.GetBioSamplesFromAnalysisThroughFastqDatasetUsed(
 		ctx,
 		appsessionId,

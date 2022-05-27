@@ -230,3 +230,39 @@ func (self *Client) GetRunLayout(ctx context.Context, runId string) ([]*RunLayou
 	}
 	return ret1, nil
 }
+
+type RunDetailsResp struct {
+	Id                  string
+	ExperimentName      string
+	DateCreated         string
+	DateModified        string
+	Status              string
+	InstrumentRunStatus string
+	FlowcellPosition    string
+	LaneAndQcStatus     string
+	Workflow            string
+	V1Pre3Id            string
+	Instrument          struct {
+		Id           string
+		Name         string
+		Type         string
+		PlatformName string
+	}
+
+	UploadStatus        string
+	DateUploadStarted   string
+	DateUploadCompleted string
+}
+
+func (self *Client) GetRun(ctx context.Context, runId string) (*RunDetailsResp, error) {
+	_url := fmt.Sprintf(`/v2/runs/%s`, runId)
+	body, err := self.GetBytes(ctx, _url)
+	if err != nil {
+		return nil, err
+	}
+	ret := new(RunDetailsResp)
+	if err := json.Unmarshal(body, ret); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
