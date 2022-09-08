@@ -232,17 +232,21 @@ func (self *Client) GetRunLayout(ctx context.Context, runId string) ([]*RunLayou
 }
 
 type RunDetailsResp struct {
-	Id                  string
-	ExperimentName      string
-	DateCreated         string
-	DateModified        string
-	Status              string
-	InstrumentRunStatus string
-	FlowcellPosition    string
-	LaneAndQcStatus     string
-	Workflow            string
-	V1Pre3Id            string
-	Instrument          struct {
+	Id                      string
+	ExperimentName          string
+	DateCreated             string
+	DateModified            string
+	Status                  string
+	InstrumentRunStatus     string
+	FlowcellPosition        string
+	LaneAndQcStatus         string
+	Workflow                string
+	V1Pre3Id                string
+	DateInstrumentStarted   string
+	DateInstrumentCompleted string
+	FlowcellBarcode         string
+	ReagentBarcode          string
+	Instrument              struct {
 		Id           int64
 		Number       int64
 		Name         string
