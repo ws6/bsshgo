@@ -359,7 +359,7 @@ func _buildSageSpec(seq *SeqStatsPre, run *RunInfoPre) (map[string]interface{}, 
 
 	}
 
-	flowcell[`percent_pf`] = seq.PercentPf
+	flowcell[`percent_pf`] = seq.PercentPf * 100 //correct bssh mistake
 	flowcell[`total_pf_yields_gb`] = seq.YieldTotal * seq.PercentPf
 	flowcell[`mean_error_rate_r1`] = seq.ErrorRateR1
 	flowcell[`mean_error_rate_r2`] = seq.ErrorRateR2
