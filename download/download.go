@@ -58,7 +58,7 @@ func getPresignedS3UrlReader(_url string) (io.ReadCloser, error) {
 	return r, err
 }
 
-func downloadWorker(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, opts *Options) error {
+func _downloadWorker(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, opts *Options) error {
 
 	done := make(chan struct{})
 
@@ -97,6 +97,67 @@ func downloadWorker(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, op
 		return err
 	}
 	defer ofh.Close()
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			//early terminate the io.Copy
+
+			if !rcClosed {
+				rc.Close()
+				rcClosed = true
+			}
+			return
+		case <-done:
+			return //as expected
+		}
+
+	}()
+
+	if _, err := io.Copy(ofh, rc); err != nil {
+		//if invalidate argument, it is most likely from the rc.Close()
+		return fmt.Errorf(`io.Copy:%s`, err.Error())
+	}
+
+	return nil
+
+}
+
+func downloadWorker(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, opts *Options) error {
+	loc, err := getBucketAndKeyFromPresignedS3URL(file.HrefContent)
+	if err != nil {
+		return err
+	}
+
+	outputFile := filepath.Join(opts.DestinationPrefix, loc.key)
+	ofh, err := os.Create(outputFile)
+	if err != nil {
+		return err
+	}
+	defer ofh.Close()
+	return DownloadFromPreSignedUrl(ctx, file, ofh)
+}
+
+func DownloadFromPreSignedUrl(ctx context.Context, file *bsshgo.FileS3PresignedUrlResp, ofh io.Writer) error {
+
+	done := make(chan struct{})
+
+	defer func() {
+		done <- struct{}{}
+	}()
+
+	rcClosed := false
+	rc, err := getPresignedS3UrlReader(file.HrefContent)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if !rcClosed { //not atomic
+			rc.Close()
+			rcClosed = true
+		}
+	}()
 
 	go func() {
 		select {

@@ -1,6 +1,8 @@
 package download
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -24,6 +26,21 @@ func getNewClient() *bsshgo.Client {
 		panic(err)
 	}
 	return ret
+}
+
+func TestDownloadFile(t *testing.T) {
+	// client := getNewClient()
+	resp := bsshgo.FileS3PresignedUrlResp{
+		HrefContent: `https://basespace-data-east.s3-external-1.amazonaws.com/0d9b95027824476f88baaf6601083a91/LP7008645-DNA_A4-replay.json?AWSAccessKeyId=AKIARPYQJSWQRDJKAWUT&Expires=1671558546&response-content-disposition=filename%3DLP7008645-DNA_A4-replay.json&response-content-type=application%2Fjson&Signature=9WUozvR%2FLx5ms4TRFibvLxDqWMY%3D`,
+	}
+	buf := new(bytes.Buffer)
+	ofh := bufio.NewWriter(buf)
+
+	if err := DownloadFromPreSignedUrl(context.Background(), &resp, ofh); err != nil {
+		t.Fatal(err.Error())
+	}
+
+	t.Log(buf.String())
 }
 
 func TestDownloadDataset(t *testing.T) {
